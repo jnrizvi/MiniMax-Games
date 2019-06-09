@@ -74,16 +74,12 @@ class TicTacToe:
             return -1
         else:
             return 0
-
-def main():
-    myBoard = TicTacToe()
-    prompt = "Y"
     
-    while prompt == "y" or prompt == "Y":
+    def playerVplayer(self):
         end = False
         symbol = "O"
-        myBoard = TicTacToe()
-        myBoard.drawBoard()
+        myGame = TicTacToe()
+        myGame.drawBoard()
         
         while end == False:
             valid = False
@@ -96,20 +92,26 @@ def main():
             guess = int(input("It is the turn for " + symbol + ". What is your move? "))
                 
             while valid == False:
-                if not myBoard.select_space(myBoard, guess, symbol):
+                if not myGame.select_space(myGame.board, guess, symbol):
                     guess = int(input("Invalid move. Turn for " + symbol + " again. What is your move? "))
                 else:
                     valid = True
-                    myBoard.drawBoard()    
+                    myGame.drawBoard()    
             
-            if myBoard.has_won(myBoard, symbol) == True:
+            if myGame.has_won(myGame.board, symbol) == True:
                 end = True
                 print(symbol, "wins. Congrats!")
                 
-            elif len(myBoard.available_moves(myBoard)) == 0:
+            elif len(myGame.available_moves(myGame.board)) == 0:
                 end = True
                 print("It's a tie.")
-            
+
+def main():
+    myGame = TicTacToe()
+    prompt = "Y"
+    
+    while prompt == "y" or prompt == "Y":
+        myGame.playerVplayer()  
         input("Press Enter to continue")
         prompt = input("Do you want to play another game? (Y/N)? ")
         
