@@ -1,108 +1,112 @@
 class TicTacToe:
-    def __init__(self):
-        # "board" is a list of 10 strings representing the board (ignore index 0)
-       
-        self.board = [" "]*10
-        self.board[0]="#"
+    def __init__(self):       
+        self.board = [
+            [1, 2, 3],
+            [4, 5, 6],
+            [7, 8, 9]
+        ]
         
     def drawBoard(self):
     # This method prints out the board with current plays adjacent to a board with index.
         
-        print(" | ".join(self.board[7:]), "7 | 8 | 9", sep="\t")
-        print("---------", "---------", sep="\t")
-        print(" | ".join(self.board[4:7]), "4 | 5 | 6", sep="\t")
-        print("---------", "---------", sep="\t")
-        print(" | ".join(self.board[1:4]), "1 | 2 | 3", sep="\t")
+        print()
+        print("\t\tTic Tac Toe")
+        print("\n\n")
+        legend = 1
+        for iRow in self.board:
+            print("\t", end="")
+            for iCell in range(len(iRow)):
+                # print(iCell)
+                if iRow[iCell] != "X" and iRow[iCell] != "O":
+                    print(" ", end="")
+                else:
+                    print(str(iRow[iCell]), end="")
+                if iCell != 2:
+                    print(" | ", sep="", end="")
+            print("\t" + str(legend) + " | " + str(legend+1) + " | " + str(legend+2))
+            if legend != 7:
+                print("\t" + "---------" + "\t" + "---------")
+            legend += 3
 
-    def boardFull(self):
-    # This method checks if the board is already full and returns True. Returns false otherwise
-        
-        return " " not in self.board
+        print("\n\n\n")
     
-    def cellIsEmpty(self, cell):
-        empty = True
-        
-        for i in self.board[1:]:
-            if self.board[cell] != " ":
-                empty = False
-        
-        return empty
-    
-    def assignMove(self, cell, symbol):
-    # assigns the symbols to the cell in the board
-        
-        for i in self.board[1:]:
-            self.board[cell] = symbol
+    def select_space(self, board, move, turn):
+        if not ((move >= 1) and (move <= 9)):
+            return False
+        row = int((move-1)/3)
+        col = (move-1)%3
+        if self.board[row][col] != "X" and self.board[row][col] != "O":
+            self.board[row][col] = turn
+            return True
+        else:
+            return False
             
         
-    def whoWon(self):
-    # returns the symbol of the player who won if there is a winner, otherwise it returns an empty string. 
-        
-        if self.isWinner("x"):
-            return "x"
-        elif self.isWinner("o"):
-            return "o"
-        else:
-            return ""
+    def available_moves(self, board):
+        moves = []
+        for row in self.board:
+            for col in row:
+                if col != "X" and col != "O":
+                    moves.append(int(col))
+        return moves
+
   
-    def isWinner(self, ch):
-    # Given a player's letter, this method returns True if that player has won.
-        
-        win = False
-        row = [ch, ch, ch]
-        
-        if self.board[1:4] == row or self.board[4:7] == row or self.board[7:] == row:
-            win = True
-        
-        for col_num in range(1,4):
-            column = self.board[col_num::3]
-            if column == row:
-                win = True
-        
-        if self.board[1::4] == row or self.board[3:8:2] == row:
-            win = True
-        
-        return win
+    def has_won(self, board, player):
+        for row in self.board:
+            if row.count(player) == 3:
+                return True
+        for i in range(3):
+            if self.board[0][i] == player and self.board[1][i] == player and self.board[2][i] == player:
+                return True
+        if self.board[0][0] == player and self.board[1][1] == player and self.board[2][2] == player:
+            return True
+        if self.board[0][2] == player and self.board[1][1] == player and self.board[2][0] == player:
+            return True
+        return False
     
+    def game_is_over(self, board):
+        return self.has_won(self.board, "X") or self.has_won(self.board, "O") or len(self.available_moves(self.board)) == 0
+
+    def evaluate_board(self, board):
+        if self.has_won(self.board, "X"):
+            return 1
+        elif self.has_won(self.board, "O"):
+            return -1
+        else:
+            return 0
+
 def main():
     myBoard = TicTacToe()
     prompt = "Y"
     
-    print("Welcome to Tic Tac Toe Series")
-    
     while prompt == "y" or prompt == "Y":
         end = False
-        symbol = "o"
+        symbol = "O"
         myBoard = TicTacToe()
         myBoard.drawBoard()
         
         while end == False:
             valid = False
             
-            if symbol == "o":
-                symbol = "x"
-            elif symbol == "x":
-                symbol = "o"
+            if symbol == "O":
+                symbol = "X"
+            elif symbol == "X":
+                symbol = "O"
                 
             guess = int(input("It is the turn for " + symbol + ". What is your move? "))
                 
             while valid == False:
-                if not 1 <= guess <= 9:
-                    guess = int(input("Invalid move.Turn for " + symbol + " again. What is your move? "))
-                    
-                elif myBoard.cellIsEmpty(guess) == False:
-                    guess = int(input(str(guess) + " is not available. Turn for " + symbol + " again. What is your move? "))
-                    
-                elif 1 <= guess <= 9 and myBoard.cellIsEmpty(guess) == True:
+                if not myBoard.select_space(myBoard, guess, symbol):
+                    guess = int(input("Invalid move. Turn for " + symbol + " again. What is your move? "))
+                else:
                     valid = True
-                    myBoard.assignMove(int(guess), symbol)
-                    myBoard.drawBoard()         
+                    myBoard.drawBoard()    
             
-            if myBoard.isWinner(symbol) == True:
+            if myBoard.has_won(myBoard, symbol) == True:
                 end = True
-                print(myBoard.whoWon(), "wins. Congrats!")
+                print(symbol, "wins. Congrats!")
                 
-            elif myBoard.boardFull() == True:
+            elif len(myBoard.available_moves(myBoard)) == 0:
                 end = True
                 print("It's a tie.")
             
