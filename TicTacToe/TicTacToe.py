@@ -163,7 +163,7 @@ class TicTacToe:
             aiGame = TicTacToe()
             min_symb = "X"  # according to the ai, the player is the minimizing player
             max_symb = "O"
-
+            isMaximizing = True
             aiGame.drawBoard(aiGame.board)
             while end == False:
                 valid = False
@@ -177,7 +177,7 @@ class TicTacToe:
                         aiGame.drawBoard(aiGame.board)
 
                 print("Now the ai is deciding...")
-                aiGame.select_space(aiGame.board, aiGame.minimax(aiGame.board, True)[1], max_symb)
+                aiGame.select_space(aiGame.board, aiGame.minimax(aiGame.board, not isMaximizing)[1], max_symb)
                 aiGame.drawBoard(aiGame.board)
 
                 if aiGame.has_won(aiGame.board, min_symb) == True:
