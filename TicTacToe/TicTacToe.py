@@ -1,4 +1,5 @@
-from minimaxTTT import *
+# from minimaxTTT import *
+from copy import deepcopy
 
 class TicTacToe:
     def __init__(self):       
@@ -33,7 +34,7 @@ class TicTacToe:
         print("\n\n\n")
     
     def select_space(self, board, move, turn):
-        if not ((move >= 1) and (move <= 9)):
+        if move not in range(1,10):
             return False
         row = int((move-1)/3)
         col = (move-1)%3
@@ -67,12 +68,12 @@ class TicTacToe:
         return False
     
     def game_is_over(self, board):
-        return has_won(board, "X") or has_won(board, "O") or len(available_moves(board)) == 0
+        return self.has_won(board, "X") or self.has_won(board, "O") or len(self.available_moves(board)) == 0
 
     def evaluate_board(self, board):
-        if has_won(self.board, "X"):
+        if self.has_won(board, "X"):
             return 1
-        elif has_won(self.board, "O"):
+        elif self.has_won(board, "O"):
             return -1
         else:
             return 0
@@ -114,76 +115,89 @@ class TicTacToe:
             input("Press Enter to continue")
             prompt = input("Do you want to play another game? (Y/N)? ")
 
+    def minimax(self, input_board, is_maximizing):
+        # Base case - the game is over, so we return the value of the board
+        if self.game_is_over(input_board):
+            return [self.evaluate_board(input_board), ""]
+        # The maximizing player
+        if is_maximizing:
+        # The best value starts at the lowest possible value
+            best_value = -float("Inf")
+            best_move = ""
+        # Loop through all the available moves
+            for move in self.available_moves(input_board):
+                # Make a copy of the board and apply the move to it
+                new_board = deepcopy(input_board)
+                self.select_space(new_board, move, "X")
+                # Recursively find your opponent's best move
+                hypothetical_value = self.minimax(new_board, False)[0]
+            # Update best value if you found a better hypothetical value
+                if hypothetical_value > best_value:
+                    best_value = hypothetical_value
+                    best_move = move
+            return [best_value, best_move]
+        # The minimizing player
+        else:
+            # The best value starts at the highest possible value
+            best_value = float("Inf")
+            best_move = ""
+            # Testing all potential moves
+            for move in self.available_moves(input_board):
+                # Copying the board and making the move
+                new_board = deepcopy(input_board)
+                self.select_space(new_board, move, "O")
+                # Passing the new board back to the maximizing player
+                hypothetical_value = self.minimax(new_board, True)[0]
+                # Keeping track of the best value seen so far
+                if hypothetical_value < best_value:
+                    best_value = hypothetical_value
+                    best_move = move
+            return [best_value, best_move]
 
-    def playerVai(self, current_board, isMaximizing):
+
+    def playerVai(self):
         prompt = "Y"
             
         while prompt == "y" or prompt == "Y":
             end = False
             aiGame = TicTacToe()
-            min_symb = input("Choose X or O (X goes first):")  # according to the ai, the player is the minimizing player
-            if min_symb == "O":
-                max_symb = "X"
-            elif min_symb == "X":
-                max_symb = "O"
+            min_symb = "X"  # according to the ai, the player is the minimizing player
+            max_symb = "O"
 
             aiGame.drawBoard(aiGame.board)
             while end == False:
                 valid = False
-                if min_symb == "X":
-                    guess = int(input("It's your turn. Enter a valid integer:"))
-                    while valid == False:
-                        if not aiGame.select_space(aiGame.board, guess, min_symb):
-                            guess = int(input("Invalid move. Please enter an integer between 1 and 9 that is not occupied "))
-                        else:
-                            valid = True
-                            aiGame.drawBoard(aiGame.board)
+                
+                guess = int(input("It's your turn. Enter a valid integer:"))
+                while valid == False:
+                    if not aiGame.select_space(aiGame.board, guess, min_symb):
+                        guess = int(input("Invalid move. Please enter an integer between 1 and 9 that is not occupied "))
+                    else:
+                        valid = True
+                        aiGame.drawBoard(aiGame.board)
 
+                print("Now the ai is deciding...")
+                aiGame.select_space(aiGame.board, aiGame.minimax(aiGame.board, True)[1], max_symb)
+                aiGame.drawBoard(aiGame.board)
 
-                    print("Now the ai is deciding...")
-                    select_space(aiGame.board, minimax(aiGame.board, True)[1], max_symb)
-                    aiGame.drawBoard(aiGame.board)
+                if aiGame.has_won(aiGame.board, min_symb) == True:
+                    end = True
+                    print(min_symb, "wins. Congrats!")
+                elif aiGame.has_won(aiGame.board, max_symb) == True:
+                    end = True
+                    print(max_symb, "wins. Congrats!")
+                elif len(aiGame.available_moves(aiGame.board)) == 0:
+                    end = True
+                    print("It's a tie.")
 
-                    if aiGame.has_won(aiGame.board, min_symb) == True:
-                        end = True
-                        print(min_symb, "wins. Congrats!")
-                    elif aiGame.has_won(aiGame.board, max_symb) == True:
-                        end = True
-                        print(max_symb, "wins. Congrats!")
-                    elif len(aiGame.available_moves(aiGame.board)) == 0:
-                        end = True
-                        print("It's a tie.")
-
-                elif min_symb == "O":
-                    print("The ai is deciding...")
-                    select_space(aiGame.board, minimax(aiGame.board, True)[1], max_symb)  # the ai will go first
-                    aiGame.drawBoard(aiGame.board)                                        
-
-
-                    guess = int(input("It's your turn. Enter a valid integer:"))          # then the player
-                    while valid == False:
-                        if not aiGame.select_space(aiGame.board, guess, min_symb):
-                            guess = int(input("Invalid move. Please enter an integer between 1 and 9 that is not occupied "))
-                        else:
-                            valid = True
-                            aiGame.drawBoard(aiGame.board)
-
-                            
-                    if aiGame.has_won(aiGame.board, min_symb) == True:
-                        end = True
-                        print(min_symb, "wins. Congrats!")
-                    elif aiGame.has_won(aiGame.board, max_symb) == True:
-                        end = True
-                        print(max_symb, "wins. Congrats!")
-                    elif len(aiGame.available_moves(aiGame.board)) == 0:
-                        end = True
-                        print("It's a tie.")
+            input("Press Enter to continue")
+            prompt = input("Do you want to play another game? (Y/N)? ")
 
 def main():
     myGame = TicTacToe()
     # print(myGame.board)
     # myGame.playerVplayer()  # human vs human
 
-    # myGame.playerVai()  # human vs ai
+    myGame.playerVai()  # human vs ai
 
 main()
